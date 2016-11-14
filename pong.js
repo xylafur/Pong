@@ -4,6 +4,7 @@
   document.body.appendChild(canvas);
 
   var playerPoints = 0, oponentPoints = 0;
+  var playerSpeed = 10, ballSpeedX = -10, ballSpeedY = 5;
 
   /****************************************************************************
   * Generic methods:                                                          *
@@ -76,28 +77,55 @@
 
   var drawMiddleLine = function(){
     c.fillStyle = "white";
-    for(var i = 0; i < canvas.height / 10; i++){
-      if( i % 3 == 0){
-        c.fillRect(canvas.width / 2 + 2, i * 10, 5, 20);
-      }
-    }
+    //White lines of length 20 are drawn at canvas positions of 45
+    for(var i = 0; i < canvas.height / 10; i++)
+      if( i % 4 == 0)
+        c.fillRect(canvas.width / 2 + 2, i * 10 + 10, 5, 20);
   }
 
   function Platform(xPos, yPos, inHeight = 50, inWidth = 10){
     this.x = xPos;
     this.y = yPos;
+    this.xVel = 0;
+    this.yVel = 0;
     this.height = inHeight;
     this.width = inWidth;
   }
   Platform.prototype.draw = function(){
     c.fillStyle = "white";
     checkBoundsPlatform(this, canvas);
+    this.updateLocation();
     c.fillRect(this.x, this.y, this.width, this.height);
+  }
+  Platform.prototype.updateLocation = function(){
+    this.x += this.xVel;
+    this.y += this.yVel;
   }
 
   var checkBoundsPlatform = function(platform, canvas){
 
   }
+
+  var moveObject = function(object, xVeloc, yVeloc){
+    object.xVel = xVeloc;
+    object.yVel = yVeloc;
+    //console.log("moveObject triggered.");
+  }
+
+  document.addEventListener('keydown', function(event){
+    //console.log("Keydown event triggered with keycode: " + event.keyCode);
+    //up arrow
+    //top of the canvas is 0 so we subtract speed to move up
+    if(event.keyCode == 38)
+      moveObject(player, 0, -playerSpeed);
+    //down arrow
+    //bottom of canvas if canvas.height so we add to move down
+    else if(event.keyCode == 40)
+      moveObject(player, 0, playerSpeed);
+  });
+  document.addEventListener('keyup', function(event){
+    moveObject(player, 0, 0);
+  });
 
   setInterval(function(){
     drawEverything();
