@@ -54,19 +54,21 @@
   *          void method that will keep the player and the oponent in bounds. *
   *          Will be called in the platform object's prototype function to    *
   *            ensure that it never leaves the gamefield.                     *
+  *
+  *      drawEverything()
+  *        Parameters:
+  *          None
+  *        Description:
+  *          Calls the draw function on everything
+  *
+  *      drawMiddleLine()
+  *        Parameters:
+  *          None
+  *        Description:
+  *          Draws the white lines signiling the middle of the board.
 
-        drawEverything()
-          Parameters:
-            None
-          Description:
-            Calls the draw function on everything
-
-        drawMiddleLine()
-          Parameters:
-            None
-          Description:
-            Draws the white lines signiling the middle of the board.
   ******************************************************************************/
+
   var drawEverything = function(){
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
@@ -83,6 +85,10 @@
         c.fillRect(canvas.width / 2 + 2, i * 10 + 10, 5, 20);
   }
 
+
+  /*******************************************************
+  ** Platform object constructor and all of its methods **
+  *******************************************************/
   function Platform(xPos, yPos, inHeight = 50, inWidth = 10){
     this.x = xPos;
     this.y = yPos;
@@ -93,17 +99,24 @@
   }
   Platform.prototype.draw = function(){
     c.fillStyle = "white";
-    checkBoundsPlatform(this, canvas);
     this.updateLocation();
+    checkBoundsPlatform(this, canvas);
     c.fillRect(this.x, this.y, this.width, this.height);
   }
   Platform.prototype.updateLocation = function(){
     this.x += this.xVel;
     this.y += this.yVel;
   }
+  /*******************************************************
+  **            End Platform and its methods            **
+  *******************************************************/
+
 
   var checkBoundsPlatform = function(platform, canvas){
-
+    if(platform.y < 0)
+      platform.y = 0;
+    else if(platform.y >= canvas.height - platform.height)
+      platform.y = canvas.height - platform.height;
   }
 
   var moveObject = function(object, xVeloc, yVeloc){
