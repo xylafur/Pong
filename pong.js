@@ -6,8 +6,12 @@
   var playerPoints = 0, oponentPoints = 0;
   var playerSpeed = 10, ballSpeedX = -10, ballSpeedY = 5;
 
+
+  var player = new Platform(50, 50);
+  var enemy = new Platform(canvas.width - 50, 50);
+
   /****************************************************************************
-  * Generic methods:                                                          *
+  * Generic functions:                                                        *
   *                                                                           *
   *    checkCollision()                                                       *
   *      Parameters:                                                          *
@@ -68,7 +72,7 @@
   *          Draws the white lines signiling the middle of the board.
 
   ******************************************************************************/
-
+  
   var drawEverything = function(){
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
@@ -83,6 +87,19 @@
     for(var i = 0; i < canvas.height / 10; i++)
       if( i % 4 == 0)
         c.fillRect(canvas.width / 2 + 2, i * 10 + 10, 5, 20);
+  }
+
+  var checkBoundsPlatform = function(platform, canvas){
+    if(platform.y < 0)
+      platform.y = 0;
+    else if(platform.y >= canvas.height - platform.height)
+      platform.y = canvas.height - platform.height;
+  }
+
+  var moveObject = function(object, xVeloc, yVeloc){
+    object.xVel = xVeloc;
+    object.yVel = yVeloc;
+    //console.log("moveObject triggered.");
   }
 
 
@@ -107,24 +124,10 @@
     this.x += this.xVel;
     this.y += this.yVel;
   }
+
   /*******************************************************
-  **            End Platform and its methods            **
+  **  Event listener functions (for player movement)    **
   *******************************************************/
-
-
-  var checkBoundsPlatform = function(platform, canvas){
-    if(platform.y < 0)
-      platform.y = 0;
-    else if(platform.y >= canvas.height - platform.height)
-      platform.y = canvas.height - platform.height;
-  }
-
-  var moveObject = function(object, xVeloc, yVeloc){
-    object.xVel = xVeloc;
-    object.yVel = yVeloc;
-    //console.log("moveObject triggered.");
-  }
-
   document.addEventListener('keydown', function(event){
     //console.log("Keydown event triggered with keycode: " + event.keyCode);
     //up arrow
@@ -140,9 +143,8 @@
     moveObject(player, 0, 0);
   });
 
+
+  //set interval is a function that triggers a function every set ammount of seconds
   setInterval(function(){
     drawEverything();
   }, 30);
-
-  var player = new Platform(50, 50);
-  var enemy = new Platform(canvas.width - 50, 50);
