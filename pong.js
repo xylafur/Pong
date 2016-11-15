@@ -9,6 +9,7 @@
 
   var player = new Platform(50, 50);
   var enemy = new Platform(canvas.width - 50, 50);
+  var ball = new Ball();
 
   /****************************************************************************
   * Generic functions:                                                        *
@@ -58,27 +59,30 @@
   *          void method that will keep the player and the oponent in bounds. *
   *          Will be called in the platform object's prototype function to    *
   *            ensure that it never leaves the gamefield.                     *
-  *
-  *      drawEverything()
-  *        Parameters:
-  *          None
-  *        Description:
-  *          Calls the draw function on everything
-  *
-  *      drawMiddleLine()
-  *        Parameters:
-  *          None
-  *        Description:
-  *          Draws the white lines signiling the middle of the board.
+  *                                                                           *
+  *      drawEverything()                                                     *
+  *        Parameters:                                                        *
+  *          None                                                             *
+  *        Description:                                                       *
+  *          Calls the draw function on everything                            *
+  *                                                                           *
+  *      drawMiddleLine()                                                     *
+  *        Parameters:                                                        *
+  *          None                                                             *
+  *        Description:                                                       *
+  *          Draws the white lines signiling the middle of the board.         *
 
   ******************************************************************************/
-  
+
   var drawEverything = function(){
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
     drawMiddleLine();
+    checkCollision(player, ball);
+    checkCollision(enemy, ball);
     player.draw();
     enemy.draw();
+    ball.draw();
   }
 
   var drawMiddleLine = function(){
@@ -100,6 +104,26 @@
     object.xVel = xVeloc;
     object.yVel = yVeloc;
     //console.log("moveObject triggered.");
+  }
+
+  var checkBoundsBall = function(ball, canvas){
+    if(ball.y <= 0)
+      ball.yVel = -ball.yVel;
+    else if(ball.y >= canvas.height - ball.height)
+      ball.yVel = -ball.yVel;
+  }
+
+  var checkCollision = function(platform, ball){
+    //meaning the ball is coming towards the player
+    if(ball.xVel < 0){
+      if(platform.x + platform.width >= ball.x && platform.x <= ball.x &&
+          ball.y >= platform.y && platform.y  + platform.height  >= ball.y)
+        ball.xVel = -ball.xVel;
+    }
+    else{
+      if(platform.x == ball.x + ball.width)
+        ball.xVel = -ball.xVel;
+    }
   }
 
 
@@ -124,6 +148,30 @@
     this.x += this.xVel;
     this.y += this.yVel;
   }
+
+  /*******************************************************
+  **   Ball object constructor and all of its methods   **
+  *******************************************************/
+  function Ball(xPos = canvas.width / 2, yPos = canvas.height / 2, xV = -5, yV = 3, w = 20, h = 20){
+    this.x = xPos;
+    this.y = yPos;
+    this.xVel = xV;
+    this.yVel = yV;
+    this.width = w;
+    this.height = h;
+  }
+  Ball.prototype.draw = function(){
+    c.fillStyle = "white";
+    this.updateLocation();
+    checkBoundsBall(this, canvas);
+    c.fillRect(this.x, this.y, this.width, this.height);
+  }
+  Ball.prototype.updateLocation = function(){
+    this.x += this.xVel;
+    this.y += this.yVel;
+  }
+
+
 
   /*******************************************************
   **  Event listener functions (for player movement)    **
