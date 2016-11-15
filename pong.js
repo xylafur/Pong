@@ -129,6 +129,15 @@
       ball.yVel = -ball.yVel;
     else if(ball.y >= canvas.height - ball.height)
       ball.yVel = -ball.yVel;
+    if(ball.x + ball.width <= 0){
+      playerPoints++;
+      ball.x = canvas.width / 2;
+      ball.xVel = 5;
+    }
+    else if(ball.x >= canvas.width){
+      ball.x = canvas.width / 2;
+      ball.xVel = -5;
+    }
   }
 
   var checkCollision = function(platform, ball){
@@ -139,7 +148,8 @@
         ball.xVel = -ball.xVel;
     }
     else{
-      if(platform.x == ball.x + ball.width)
+      if(platform.x == ball.x + ball.width && ball.y >= platform.y
+          && ball.y < platform.y + platform.height)
         ball.xVel = -ball.xVel;
     }
   }
