@@ -4,7 +4,7 @@
   document.body.appendChild(canvas);
 
   var playerPoints = 0, oponentPoints = 0;
-  var playerSpeed = 10, ballSpeedX = -10, ballSpeedY = 5;
+  var playerSpeed = 10, enemySpeed = 5, ballSpeedX = -10, ballSpeedY = 5;
 
 
   var player = new Platform(50, 50);
@@ -72,17 +72,35 @@
   *        Description:                                                       *
   *          Draws the white lines signiling the middle of the board.         *
 
+        enemyAI()
+          Parameters:
+            enemy: the enemy game object platform
+            ball: the ball game object
+          Description:
+            if the ball gets within a certian distance of the enemy it will
+              begin to move in the direction of the ball.
   ******************************************************************************/
 
   var drawEverything = function(){
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
     drawMiddleLine();
+    enemyAI(enemy, ball);
     checkCollision(player, ball);
     checkCollision(enemy, ball);
     player.draw();
     enemy.draw();
     ball.draw();
+  }
+
+  var enemyAI = function(enemy, ball){
+    if(ball.x >= 3 * canvas.width / 4){
+      //console.log("on enemy side.");
+      if(enemy.y - enemy.height / 2 > ball.y)
+        enemy.y -= enemySpeed;
+      else if(enemy.y + enemy.height / 2 < ball.y)
+        enemy.y += enemySpeed;
+    }
   }
 
   var drawMiddleLine = function(){
