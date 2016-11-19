@@ -1,15 +1,17 @@
+//I don't like code on the first line its to close to the top
+  var canvas = document.createElement("canvas"),        //the actual canvas we manipulate
+  c = canvas.getContext("2d");                          //used to draw game objects
+  canvas.width = 800; canvas.height = 400;              //max size of the canvas
+  document.body.appendChild(canvas);                    //pinning this canvas onto the DOM
 
-  var canvas = document.createElement("canvas"), c = canvas.getContext("2d");
-  canvas.width = 800; canvas.height = 400;
-  document.body.appendChild(canvas);
-
-  var playerPoints = 0, oponentPoints = 0;
-  var playerSpeed = 10, enemySpeed = 5, ballSpeedX = -10, ballSpeedY = 5;
+  var playerPoints = 0, opponentPoints = 0;              //just a score of each players points
+  var playerSpeed = 10, enemySpeed = 5,                 //max speed at which players can move
+  ballSpeedX = -10, ballSpeedY = 5;                     //speed of the ball in X and Y directions
 
 
-  var player = new Platform(50, 50);
-  var enemy = new Platform(canvas.width - 50, 50);
-  var ball = new Ball();
+  var player = new Platform(50, 50);                    //Player platform object (left side)
+  var enemy = new Platform(canvas.width - 50, 50);      //Enemy platform object (right side)
+  var ball = new Ball();                                //Ball game object that bounces around
 
   /****************************************************************************
   * Generic functions:                                                        *
@@ -71,20 +73,27 @@
   *          None                                                             *
   *        Description:                                                       *
   *          Draws the white lines signiling the middle of the board.         *
-
-        enemyAI()
-          Parameters:
-            enemy: the enemy game object platform
-            ball: the ball game object
-          Description:
-            if the ball gets within a certian distance of the enemy it will
-              begin to move in the direction of the ball.
+  *                                                                           *
+  *      enemyAI()                                                            *
+  *        Parameters:                                                        *
+  *          enemy: the enemy game object platform                            *
+  *          ball: the ball game object                                       *
+  *        Description:                                                       *
+  *          if the ball gets within a certian distance of the enemy it will  *
+  *            begin to move in the direction of the ball.                    *
+  *
+          displayScore()
+            Parameters:
+              None
+            Description:
+              Displays the player and the enemy's scores in the corners
   ******************************************************************************/
 
   var drawEverything = function(){
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
     drawMiddleLine();
+    displayScore();
     enemyAI(enemy, ball);
     checkCollision(player, ball);
     checkCollision(enemy, ball);
@@ -130,13 +139,14 @@
     else if(ball.y >= canvas.height - ball.height)
       ball.yVel = -ball.yVel;
     if(ball.x + ball.width <= 0){
-      playerPoints++;
+      opponentPoints++;
       ball.x = canvas.width / 2;
       ball.xVel = 5;
     }
     else if(ball.x >= canvas.width){
       ball.x = canvas.width / 2;
       ball.xVel = -5;
+      playerPoints++;
     }
   }
 
@@ -145,15 +155,24 @@
     if(ball.xVel < 0){
       if(platform.x + platform.width >= ball.x && platform.x <= ball.x &&
           ball.y >= platform.y && platform.y  + platform.height  >= ball.y)
-        ball.xVel = -ball.xVel;
+        bounceBall(platform, ball);
     }
     else{
       if(platform.x == ball.x + ball.width && ball.y >= platform.y
           && ball.y < platform.y + platform.height)
-        ball.xVel = -ball.xVel;
+        bounceBall(platform, ball);
     }
   }
 
+  var bounceBall = function(platform, ball){
+    ball.xVel = -ball.xVel;
+  }
+
+  var displayScore = function(){
+    c.font = "30px Georgia";
+    c.fillText(playerPoints, 10, 30);
+    c.fillText(opponentPoints, canvas.width - 30, 30);
+  }
 
   /*******************************************************
   ** Platform object constructor and all of its methods **
