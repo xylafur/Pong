@@ -5,8 +5,8 @@
   document.body.appendChild(canvas);                    //pinning this canvas onto the DOM
 
   var playerPoints = 0, opponentPoints = 0;              //just a score of each players points
-  var playerSpeed = 10, enemySpeed = 5,                 //max speed at which players can move
-  ballSpeedX = -10, ballSpeedY = 5;                     //speed of the ball in X and Y directions
+  var playerSpeed = 10, enemySpeed = 10,                 //max speed at which players can move
+  ballSpeedX = -100, ballSpeedY = 5;                     //speed of the ball in X and Y directions
 
 
   var player = new Platform(50, 50);                    //Player platform object (left side)
@@ -87,6 +87,13 @@
               None
             Description:
               Displays the player and the enemy's scores in the corners
+
+          calcCenterY()
+            Parameters:
+              Platform
+            Description:
+              returns the center of a platform in Y axis (number from 0 to
+                canvas.height)
   ******************************************************************************/
 
   var drawEverything = function(){
@@ -105,9 +112,9 @@
   var enemyAI = function(enemy, ball){
     if(ball.x >= 3 * canvas.width / 4){
       //console.log("on enemy side.");
-      if(enemy.y - enemy.height / 2 > ball.y)
+      if(calcCenterY(enemy) > calcCenterY(ball))
         enemy.y -= enemySpeed;
-      else if(enemy.y + enemy.height / 2 < ball.y)
+      else if(calcCenterY(enemy) < calcCenterY(ball))
         enemy.y += enemySpeed;
     }
   }
@@ -134,18 +141,27 @@
   }
 
   var checkBoundsBall = function(ball, canvas){
+    //hits top
     if(ball.y <= 0)
       ball.yVel = -ball.yVel;
+    //hits bottom
     else if(ball.y >= canvas.height - ball.height)
       ball.yVel = -ball.yVel;
+
+    //exits left
     if(ball.x + ball.width <= 0){
       opponentPoints++;
       ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
       ball.xVel = 5;
+      ball.yVel = 5;
     }
+    //exits right
     else if(ball.x >= canvas.width){
       ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
       ball.xVel = -5;
+      ball.yVel = -5;
       playerPoints++;
     }
   }
@@ -165,13 +181,45 @@
   }
 
   var bounceBall = function(platform, ball){
+
+    //console.log(Math.abs(calcCenterY(platform) - calcCenterY(ball)));
+
+    //this means that the ball is above the middle
+    //  of the platform bc up is 0 and down is positive
+    if(calcCenterY(platform) > calcCenterY(ball) ){
+      if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 30){
+        ball.yVel = -15;
+      }
+      else if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 10){
+        ball.yVel = -10;
+      }
+      else{
+        ball.yVel = -5;
+      }
+    }
+    else{
+      if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 30){
+        ball.yVel = 15;
+      }
+      else if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 10){
+        ball.yVel = 10;
+      }
+      else{
+        ball.yVel = 5;
+      }
+    }
+
     ball.xVel = -ball.xVel;
+  }
+
+  var calcCenterY = function(platform){
+    return platform.y + (platform.height / 2);
   }
 
   var displayScore = function(){
     c.font = "30px Georgia";
     c.fillText(playerPoints, 10, 30);
-    c.fillText(opponentPoints, canvas.width - 30, 30);
+    c.fillText(opponentPoints, canvas.width - 50, 30);
   }
 
   /*******************************************************
