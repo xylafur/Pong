@@ -1,15 +1,17 @@
+//I don't like code on the first line its to close to the top
+  var canvas = document.createElement("canvas"),        //the actual canvas we manipulate
+  c = canvas.getContext("2d");                          //used to draw game objects
+  canvas.width = 800; canvas.height = 400;              //max size of the canvas
+  document.body.appendChild(canvas);                    //pinning this canvas onto the DOM
 
-  var canvas = document.createElement("canvas"), c = canvas.getContext("2d");
-  canvas.width = 800; canvas.height = 400;
-  document.body.appendChild(canvas);
-
-  var playerPoints = 0, oponentPoints = 0;
-  var playerSpeed = 10, enemySpeed = 5, ballSpeedX = -10, ballSpeedY = 5;
+  var playerPoints = 0, opponentPoints = 0;              //just a score of each players points
+  var playerSpeed = 10, enemySpeed = 10,                 //max speed at which players can move
+  ballSpeedX = -100, ballSpeedY = 5;                     //speed of the ball in X and Y directions
 
 
-  var player = new Platform(50, 50);
-  var enemy = new Platform(canvas.width - 50, 50);
-  var ball = new Ball();
+  var player = new Platform(50, 50);                    //Player platform object (left side)
+  var enemy = new Platform(canvas.width - 50, 50);      //Enemy platform object (right side)
+  var ball = new Ball();                                //Ball game object that bounces around
 
   /****************************************************************************
   * Generic functions:                                                        *
@@ -71,20 +73,34 @@
   *          None                                                             *
   *        Description:                                                       *
   *          Draws the white lines signiling the middle of the board.         *
+  *                                                                           *
+  *      enemyAI()                                                            *
+  *        Parameters:                                                        *
+  *          enemy: the enemy game object platform                            *
+  *          ball: the ball game object                                       *
+  *        Description:                                                       *
+  *          if the ball gets within a certian distance of the enemy it will  *
+  *            begin to move in the direction of the ball.                    *
+  *
+          displayScore()
+            Parameters:
+              None
+            Description:
+              Displays the player and the enemy's scores in the corners
 
-        enemyAI()
-          Parameters:
-            enemy: the enemy game object platform
-            ball: the ball game object
-          Description:
-            if the ball gets within a certian distance of the enemy it will
-              begin to move in the direction of the ball.
+          calcCenterY()
+            Parameters:
+              Platform
+            Description:
+              returns the center of a platform in Y axis (number from 0 to
+                canvas.height)
   ******************************************************************************/
 
   var drawEverything = function(){
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
     drawMiddleLine();
+    displayScore();
     enemyAI(enemy, ball);
     checkCollision(player, ball);
     checkCollision(enemy, ball);
@@ -96,9 +112,9 @@
   var enemyAI = function(enemy, ball){
     if(ball.x >= 3 * canvas.width / 4){
       //console.log("on enemy side.");
-      if(enemy.y - enemy.height / 2 > ball.y)
+      if(calcCenterY(enemy) > calcCenterY(ball))
         enemy.y -= enemySpeed;
-      else if(enemy.y + enemy.height / 2 < ball.y)
+      else if(calcCenterY(enemy) < calcCenterY(ball))
         enemy.y += enemySpeed;
     }
   }
@@ -125,18 +141,28 @@
   }
 
   var checkBoundsBall = function(ball, canvas){
+    //hits top
     if(ball.y <= 0)
       ball.yVel = -ball.yVel;
+    //hits bottom
     else if(ball.y >= canvas.height - ball.height)
       ball.yVel = -ball.yVel;
+
+    //exits left
     if(ball.x + ball.width <= 0){
-      playerPoints++;
+      opponentPoints++;
       ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
       ball.xVel = 5;
+      ball.yVel = 5;
     }
+    //exits right
     else if(ball.x >= canvas.width){
       ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
       ball.xVel = -5;
+      ball.yVel = -5;
+      playerPoints++;
     }
   }
 
@@ -145,15 +171,56 @@
     if(ball.xVel < 0){
       if(platform.x + platform.width >= ball.x && platform.x <= ball.x &&
           ball.y >= platform.y && platform.y  + platform.height  >= ball.y)
-        ball.xVel = -ball.xVel;
+        bounceBall(platform, ball);
     }
     else{
       if(platform.x == ball.x + ball.width && ball.y >= platform.y
           && ball.y < platform.y + platform.height)
-        ball.xVel = -ball.xVel;
+        bounceBall(platform, ball);
     }
   }
 
+  var bounceBall = function(platform, ball){
+
+    //console.log(Math.abs(calcCenterY(platform) - calcCenterY(ball)));
+
+    //this means that the ball is above the middle
+    //  of the platform bc up is 0 and down is positive
+    if(calcCenterY(platform) > calcCenterY(ball) ){
+      if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 30){
+        ball.yVel = -15;
+      }
+      else if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 10){
+        ball.yVel = -10;
+      }
+      else{
+        ball.yVel = -5;
+      }
+    }
+    else{
+      if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 30){
+        ball.yVel = 15;
+      }
+      else if(Math.abs(calcCenterY(platform) - calcCenterY(ball)) > 10){
+        ball.yVel = 10;
+      }
+      else{
+        ball.yVel = 5;
+      }
+    }
+
+    ball.xVel = -ball.xVel;
+  }
+
+  var calcCenterY = function(platform){
+    return platform.y + (platform.height / 2);
+  }
+
+  var displayScore = function(){
+    c.font = "30px Georgia";
+    c.fillText(playerPoints, 10, 30);
+    c.fillText(opponentPoints, canvas.width - 50, 30);
+  }
 
   /*******************************************************
   ** Platform object constructor and all of its methods **
